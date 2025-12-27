@@ -1,426 +1,428 @@
-# Amazon Athena Query Optimization for ALB Access Logs Using Glue Crawlers
+# Multi-Cloud Infrastructure Composer
+## Universal Log Analysis Platform for AWS, GCP, and Azure
 
-## Overview
+[![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://www.terraform.io/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![AWS](https://img.shields.io/badge/AWS-Supported-orange.svg)](https://aws.amazon.com/)
+[![GCP](https://img.shields.io/badge/GCP-Supported-blue.svg)](https://cloud.google.com/)
+[![Azure](https://img.shields.io/badge/Azure-Supported-blue.svg)](https://azure.microsoft.com/)
 
-This repository demonstrates how to optimize Amazon Athena query performance for Application Load Balancer (ALB) access logs stored in Amazon S3. It uses AWS Glue crawlers with built-in classifiers to automatically detect schemas and add partitions to the AWS Glue Data Catalog, enabling efficient partition pruning with minimal operational effort.
+---
 
-## Architecture
+## 🎯 Overview
+
+A comprehensive, production-ready, multi-cloud infrastructure solution for analyzing load balancer access logs. Built with **maximum modularity**, **reusability**, and **best practices** across AWS, GCP, and Azure.
+
+### Key Features
+
+- ✅ **Multi-Cloud Support**: Deploy to AWS, GCP, Azure, or all three simultaneously
+- ✅ **Infrastructure as Code**: 100% Terraform-based with modular architecture
+- ✅ **Python Automation**: CLI tools for deployment, validation, and cost estimation
+- ✅ **Auto-Generated Diagrams**: Visual infrastructure maps for all clouds
+- ✅ **100-Step Tutorial**: Complete guide from novice to expert
+- ✅ **Production-Ready**: Security hardened, cost-optimized, scalable
+- ✅ **Well-Architected**: Follows AWS, GCP, and Azure best practices
+
+---
+
+## 📁 Repository Structure
 
 ```
-┌─────────────┐
-│     ALB     │
-└──────┬──────┘
-       │ Access Logs
-       ▼
-┌─────────────────────────────────────┐
-│  S3 Bucket (Partitioned Structure)  │
-│  /alb-logs/AWSLogs/.../YYYY/MM/DD/  │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────┐
-│      AWS Glue Crawler                │
-│  • Built-in ALB Classifier           │
-│  • Automatic Schema Detection        │
-│  • Automatic Partition Discovery     │
-└──────────────┬───────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────┐
-│    AWS Glue Data Catalog             │
-│  • Database: alb_logs                │
-│  • Table: alb_access_logs            │
-│  • Partitions: year/month/day        │
-└──────────────┬───────────────────────┘
-               │
-               ▼
-┌──────────────────────────────────────┐
-│      Amazon Athena                   │
-│  • Partition Pruning                 │
-│  • Optimized Queries                 │
-│  • Reduced Data Scanned              │
-└──────────────────────────────────────┘
+.
+├── modules/                      # Terraform modules (organized by cloud)
+│   ├── aws/                      # AWS implementation (S3, Glue, Athena)
+│   ├── gcp/                      # GCP implementation (GCS, BigQuery)
+│   ├── azure/                    # Azure implementation (Blob, Synapse)
+│   └── common/                   # Shared/reusable components
+│
+├── scripts/                      # Automation scripts
+│   ├── python/                   # Python utilities
+│   │   ├── infra_cli.py         # Main CLI for infrastructure management
+│   │   ├── generate_diagrams.py # Infrastructure diagram generator
+│   │   ├── validate_infrastructure.py  # Validation utility
+│   │   └── cost_estimator.py    # Cost estimation tool
+│   └── bash/                     # Bash helper scripts
+│
+├── docs/                         # Documentation
+│   ├── tutorials/                # Step-by-step guides
+│   │   └── 100-STEP-GUIDE.md    # Comprehensive tutorial (novice → expert)
+│   ├── architecture/             # Architecture documentation
+│   │   └── MULTI-CLOUD-ARCHITECTURE.md
+│   └── guides/                   # Best practices and guides
+│       └── BEST-PRACTICES.md
+│
+├── map-diagram-infra/           # Auto-generated infrastructure diagrams
+│   ├── README.md
+│   ├── aws-infrastructure.png   # (Generated)
+│   ├── gcp-infrastructure.png   # (Generated)
+│   ├── azure-infrastructure.png # (Generated)
+│   └── multi-cloud-infrastructure.png  # (Generated)
+│
+├── tests/                        # Test suites
+│   ├── python/                   # Python unit tests
+│   └── terraform/                # Terraform validation tests
+│
+├── examples/                     # Usage examples
+│   ├── sample-logs/
+│   └── upload-sample-logs.sh
+│
+├── main.tf                       # Root Terraform configuration
+├── variables.tf                  # Root variables
+├── outputs.tf                    # Root outputs
+├── requirements.txt              # Python dependencies
+├── README.md                     # This file
+└── .gitignore                    # Git ignore patterns
 ```
 
-## Key Features
+---
 
-### 1. **Automatic Schema Detection**
-- AWS Glue crawler uses built-in ALB log classifier
-- No manual schema definition required
-- Automatically detects all ALB log fields
+## 🚀 Quick Start
 
-### 2. **Automatic Partition Discovery**
-- Crawler detects partition structure from S3 paths
-- Automatically creates partitions for year/month/day
-- No manual partition management needed
+### Prerequisites
 
-### 3. **Partition Pruning for Performance**
-- Athena queries use partition filters to scan only relevant data
-- Significantly reduces data scanned and query costs
-- Improves query performance by orders of magnitude
+- **Terraform** >= 1.0
+- **Python** >= 3.8
+- **Cloud CLI** for your chosen provider:
+  - AWS CLI (for AWS)
+  - gcloud CLI (for GCP)
+  - Azure CLI (for Azure)
+- **Git**
 
-### 4. **No Data Transformation Required**
-- Queries original log files directly
-- No ETL jobs or file format conversion
-- Maintains original data in native format
-
-## Why This Approach Minimizes Operational Effort (DEA-C01 Best Practices)
-
-### Minimal Operational Effort Factors:
-
-1. **No Manual Schema Management**
-   - Glue crawler automatically detects ALB log schema
-   - No need to write CREATE TABLE statements
-   - Schema updates handled automatically
-
-2. **Automatic Partition Discovery**
-   - Crawler automatically discovers and adds new partitions
-   - No manual MSCK REPAIR TABLE or ALTER TABLE ADD PARTITION commands
-   - Scales automatically as new logs arrive
-
-3. **No Data Transformation**
-   - Query logs in original format (no Parquet/ORC conversion needed)
-   - No ETL pipelines to build and maintain
-   - No additional storage for transformed data
-   - Lower cost and complexity
-
-4. **Built-in ALB Classifier**
-   - AWS Glue has pre-built classifier for ALB logs
-   - No custom classifiers or SerDe configurations needed
-   - Works out-of-the-box with standard ALB log format
-
-5. **Serverless and Managed**
-   - No servers to manage
-   - No infrastructure to maintain
-   - Pay only for what you use
-
-### Performance Benefits:
-
-| Query Type | Without Partitioning | With Partitioning | Improvement |
-|------------|---------------------|-------------------|-------------|
-| Single Day | Scans all data | Scans 1 day only | 99%+ reduction |
-| Error Analysis | Full table scan | Partition-filtered | 10-100x faster |
-| Cost per Query | Higher (more data) | Lower (less data) | Proportional to reduction |
-
-### DEA-C01 Alignment:
-
-This solution aligns with DEA-C01 (AWS Certified Data Engineer - Associate) best practices:
-
-- **Data Store Management**: Leverages S3 partitioning for efficient data organization
-- **Data Pipeline**: Uses serverless, managed services (Glue, Athena)
-- **Operational Excellence**: Minimizes manual operations through automation
-- **Cost Optimization**: Reduces costs through partition pruning
-- **Performance Optimization**: Improves query performance without complex transformations
-
-## Prerequisites
-
-- AWS Account
-- Terraform >= 1.0
-- AWS CLI configured with appropriate credentials
-- Application Load Balancer generating access logs (optional for testing)
-
-## Deployment
-
-### 1. Clone the Repository
+### Installation
 
 ```bash
+# 1. Clone the repository
 git clone <repository-url>
 cd dea-c01-athena-query-optimization-for-alb-access-logs-using-glue-crawlers
+
+# 2. Install Python dependencies
+pip install -r requirements.txt
+
+# 3. Choose your deployment path:
 ```
 
-### 2. Initialize Terraform
+### Option A: Deploy to AWS
 
+```bash
+# Initialize AWS module
+cd modules/aws
+terraform init
+
+# Plan deployment
+terraform plan
+
+# Apply infrastructure
+terraform apply
+```
+
+### Option B: Deploy to GCP
+
+```bash
+# Set GCP project
+export TF_VAR_gcp_project_id="your-project-id"
+
+# Initialize GCP module
+cd modules/gcp
+terraform init
+terraform apply
+```
+
+### Option C: Deploy to Azure
+
+```bash
+# Set Azure subscription
+export TF_VAR_azure_subscription_id="your-subscription-id"
+
+# Initialize Azure module
+cd modules/azure
+terraform init
+terraform apply
+```
+
+### Option D: Use Python CLI (Recommended)
+
+```bash
+# Deploy to AWS
+python scripts/python/infra_cli.py init aws
+python scripts/python/infra_cli.py plan aws
+python scripts/python/infra_cli.py apply aws
+
+# Or deploy to all clouds
+python scripts/python/infra_cli.py deploy-all
+```
+
+---
+
+## 📊 Architecture
+
+### Common Pattern Across All Clouds
+
+```
+Load Balancer → Object Storage (Partitioned) → Metadata Catalog → Query Engine → Results
+```
+
+### AWS Implementation
+
+```
+ALB → S3 (partitioned) → Glue Crawler → Glue Catalog → Athena → Results S3
+```
+
+**Key Services:**
+- Amazon S3: Log storage with date partitions
+- AWS Glue: Automatic schema detection and partition management
+- Amazon Athena: Serverless SQL queries with partition pruning
+
+### GCP Implementation
+
+```
+Cloud LB → Cloud Storage → BigQuery Table (partitioned + clustered) → Query Results
+```
+
+**Key Services:**
+- Cloud Storage: Log storage
+- BigQuery: Partitioned tables with clustering for optimization
+
+### Azure Implementation
+
+```
+Azure LB → Blob Storage → Synapse Workspace → Spark Pool → Query Results
+```
+
+**Key Services:**
+- Blob Storage: Log storage with lifecycle management
+- Azure Synapse: Analytics workspace with Spark processing
+
+See [Multi-Cloud Architecture](docs/architecture/MULTI-CLOUD-ARCHITECTURE.md) for detailed diagrams.
+
+---
+
+## 🛠️ Python CLI Tools
+
+### Infrastructure Management
+
+```bash
+# Initialize infrastructure
+python scripts/python/infra_cli.py init <aws|gcp|azure>
+
+# Plan changes
+python scripts/python/infra_cli.py plan <aws|gcp|azure>
+
+# Apply changes
+python scripts/python/infra_cli.py apply <aws|gcp|azure> [--auto-approve]
+
+# Destroy infrastructure
+python scripts/python/infra_cli.py destroy <aws|gcp|azure> [--auto-approve]
+
+# Validate configuration
+python scripts/python/infra_cli.py validate <aws|gcp|azure>
+
+# Show outputs
+python scripts/python/infra_cli.py output <aws|gcp|azure>
+```
+
+### Diagram Generation
+
+```bash
+# Generate all infrastructure diagrams
+python scripts/python/generate_diagrams.py
+
+# Diagrams saved to: map-diagram-infra/
+```
+
+### Validation
+
+```bash
+# Validate all modules
+python scripts/python/validate_infrastructure.py
+```
+
+### Cost Estimation
+
+```bash
+# Estimate infrastructure costs
+python scripts/python/cost_estimator.py
+
+# View detailed cost breakdown
+```
+
+---
+
+## 📚 Documentation
+
+### Quick Links
+
+- **[100-Step Tutorial](docs/tutorials/100-STEP-GUIDE.md)** - Complete guide from novice to expert
+- **[Architecture Overview](docs/architecture/MULTI-CLOUD-ARCHITECTURE.md)** - Detailed architecture documentation
+- **[Best Practices](docs/guides/BEST-PRACTICES.md)** - Production deployment guidelines
+- **[Diagram Map](map-diagram-infra/README.md)** - Infrastructure diagrams
+
+### Learning Path
+
+1. **Beginner**: Start with [100-Step Tutorial](docs/tutorials/100-STEP-GUIDE.md) Steps 1-20
+2. **Intermediate**: Deploy to single cloud (Steps 21-60)
+3. **Advanced**: Multi-cloud deployment (Steps 61-100)
+4. **Expert**: Customize and extend the infrastructure
+
+---
+
+## 💰 Cost Estimation
+
+### AWS (Standard Scenario: 100GB logs, 10 queries/day)
+
+| Service | Monthly Cost |
+|---------|-------------|
+| S3 Storage (100GB) | $2.30 |
+| Glue Crawler (30 runs) | $1.32 |
+| Athena (300GB scanned) | $1.50 |
+| **Total** | **~$5/month** |
+
+### GCP (Similar Scenario)
+
+| Service | Monthly Cost |
+|---------|-------------|
+| Cloud Storage (100GB) | $2.00 |
+| BigQuery (300GB scanned + 100GB storage) | $3.50 |
+| **Total** | **~$5.50/month** |
+
+### Azure (Similar Scenario)
+
+| Service | Monthly Cost |
+|---------|-------------|
+| Blob Storage (100GB) | $1.84 |
+| Synapse Spark Pool (10 hours) | $15.00 |
+| **Total** | **~$17/month** |
+
+> **Note**: Costs vary by region and usage. Run `cost_estimator.py` for detailed estimates.
+
+---
+
+## 🔒 Security Features
+
+- ✅ **Encryption**: All data encrypted at rest and in transit
+- ✅ **Access Control**: Principle of least privilege IAM policies
+- ✅ **Network Security**: Public access blocked on all storage
+- ✅ **Audit Logging**: Complete audit trail for compliance
+- ✅ **Secret Management**: No hard-coded credentials
+
+See [Best Practices](docs/guides/BEST-PRACTICES.md) for security guidelines.
+
+---
+
+## 🧪 Testing
+
+### Run Unit Tests
+
+```bash
+# Run Python tests
+pytest tests/python/ -v
+
+# Run with coverage
+pytest tests/python/ --cov=scripts/python --cov-report=html
+```
+
+### Validate Terraform
+
+```bash
+# Validate all modules
+python scripts/python/validate_infrastructure.py
+
+# Or validate individual modules
+cd modules/aws && terraform validate
+cd modules/gcp && terraform validate
+cd modules/azure && terraform validate
+```
+
+---
+
+## 📈 Monitoring & Operations
+
+### Key Metrics
+
+- **Data Ingestion**: Logs received per hour
+- **Query Performance**: Execution time, data scanned
+- **Cost**: Query costs, storage costs
+- **Reliability**: Success/failure rates
+
+### Monitoring Tools
+
+- **AWS**: CloudWatch Metrics & Alarms
+- **GCP**: Cloud Monitoring (Stackdriver)
+- **Azure**: Azure Monitor & Log Analytics
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add/update tests
+5. Update documentation
+6. Submit a pull request
+
+---
+
+## 📋 Roadmap
+
+- [ ] Add partition projection support (AWS Athena)
+- [ ] BI tool integration (QuickSight, Looker, Power BI)
+- [ ] Real-time log processing
+- [ ] ML/AI analytics integration
+- [ ] Multi-region deployment support
+- [ ] Kubernetes deployment option
+
+---
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**Issue: Terraform state lock**
+```bash
+terraform force-unlock <LOCK_ID>
+```
+
+**Issue: Permission denied**
+- Check IAM permissions for your cloud account
+- Verify CLI is authenticated
+- Review service account roles
+
+**Issue: Module not found**
 ```bash
 terraform init
 ```
 
-### 3. Review and Customize Variables (Optional)
+See [100-Step Tutorial](docs/tutorials/100-STEP-GUIDE.md) Appendix B for detailed troubleshooting.
 
-Create a `terraform.tfvars` file:
+---
 
-```hcl
-aws_region     = "us-east-1"
-environment    = "dev"
-project_name   = "athena-alb-logs"
-glue_crawler_schedule = "cron(0 2 * * ? *)"  # Daily at 2 AM UTC
-```
-
-### 4. Deploy Infrastructure
-
-```bash
-terraform plan
-terraform apply
-```
-
-### 5. Note Output Values
-
-After deployment, Terraform outputs important values:
-
-```bash
-terraform output
-```
-
-## Usage
-
-### Step 1: Upload Sample Logs (For Testing)
-
-```bash
-# Get the bucket name from Terraform output
-BUCKET_NAME=$(terraform output -raw alb_logs_bucket_name)
-
-# Upload sample logs
-./examples/upload-sample-logs.sh $BUCKET_NAME
-```
-
-### Step 2: Run Glue Crawler
-
-```bash
-# Get the crawler name from Terraform output
-CRAWLER_NAME=$(terraform output -raw glue_crawler_name)
-
-# Start the crawler
-aws glue start-crawler --name $CRAWLER_NAME
-
-# Check crawler status
-aws glue get-crawler --name $CRAWLER_NAME
-```
-
-The crawler will:
-1. Scan the S3 bucket
-2. Detect ALB log format using built-in classifier
-3. Create table schema in Glue Data Catalog
-4. Add partitions for each date (year/month/day)
-
-### Step 3: Query Data in Athena
-
-#### Option A: Use AWS Console
-
-1. Open Amazon Athena console
-2. Select the workgroup: `athena-alb-logs-workgroup`
-3. View saved queries in "Saved queries" tab
-4. Run queries against the `alb_access_logs` table
-
-#### Option B: Use AWS CLI
-
-```bash
-# Get workgroup and database names
-WORKGROUP=$(terraform output -raw athena_workgroup_name)
-DATABASE=$(terraform output -raw glue_database_name)
-
-# Run a query
-aws athena start-query-execution \
-  --query-string "SELECT * FROM alb_access_logs LIMIT 10;" \
-  --query-execution-context Database=$DATABASE \
-  --work-group $WORKGROUP
-```
-
-### Example Queries
-
-#### 1. Count Requests by Status Code (With Partition Pruning)
-
-```sql
-SELECT 
-  target_status_code,
-  COUNT(*) as request_count
-FROM alb_access_logs
-WHERE year = '2024' 
-  AND month = '12'
-  AND day = '16'
-GROUP BY target_status_code
-ORDER BY request_count DESC;
-```
-
-**Benefits**: Scans only data for December 16, 2024
-
-#### 2. Top Requested URLs
-
-```sql
-SELECT 
-  request_url,
-  COUNT(*) as request_count,
-  AVG(target_processing_time) as avg_processing_time
-FROM alb_access_logs
-WHERE year = '2024' 
-  AND month = '12'
-  AND day = '16'
-GROUP BY request_url
-ORDER BY request_count DESC
-LIMIT 20;
-```
-
-#### 3. Error Analysis (4xx and 5xx Errors)
-
-```sql
-SELECT 
-  target_status_code,
-  request_url,
-  COUNT(*) as error_count
-FROM alb_access_logs
-WHERE year = '2024' 
-  AND month = '12'
-  AND day = '16'
-  AND (target_status_code BETWEEN 400 AND 499 
-       OR target_status_code BETWEEN 500 AND 599)
-GROUP BY target_status_code, request_url
-ORDER BY error_count DESC
-LIMIT 50;
-```
-
-#### 4. Show Available Partitions
-
-```sql
-SHOW PARTITIONS alb_access_logs;
-```
-
-### Performance Comparison
-
-To demonstrate the benefit of partition pruning, compare these two queries:
-
-**With Partition Pruning** (Fast):
-```sql
-SELECT COUNT(*) FROM alb_access_logs
-WHERE year = '2024' AND month = '12' AND day = '16';
-```
-
-**Without Partition Pruning** (Slow):
-```sql
-SELECT COUNT(*) FROM alb_access_logs
-WHERE time >= '2024-12-16T00:00:00Z' 
-  AND time < '2024-12-17T00:00:00Z';
-```
-
-The first query scans only partitioned data, while the second scans all data.
-
-## Monitoring and Maintenance
-
-### Crawler Schedule
-
-The Glue crawler runs automatically based on the schedule (default: daily at 2 AM UTC). To modify:
-
-```hcl
-# In terraform.tfvars
-glue_crawler_schedule = "cron(0 6 * * ? *)"  # Daily at 6 AM UTC
-```
-
-Or disable automatic scheduling:
-
-```hcl
-glue_crawler_schedule = ""
-```
-
-### Manual Crawler Execution
-
-Run the crawler manually when needed:
-
-```bash
-aws glue start-crawler --name $(terraform output -raw glue_crawler_name)
-```
-
-### View Glue Table Details
-
-```bash
-aws glue get-table \
-  --database-name $(terraform output -raw glue_database_name) \
-  --name alb_access_logs
-```
-
-### View Partitions
-
-```bash
-aws glue get-partitions \
-  --database-name $(terraform output -raw glue_database_name) \
-  --table-name alb_access_logs
-```
-
-## Cost Optimization
-
-### Athena Query Costs
-
-- Charged per data scanned: $5 per TB
-- Partition pruning reduces data scanned by 90-99%
-- Example: Querying 1 day of logs instead of 1 year (365x reduction)
-
-### S3 Storage Costs
-
-- Standard S3 storage: ~$0.023 per GB/month
-- Lifecycle policy automatically deletes logs after 90 days
-
-### Glue Crawler Costs
-
-- $0.44 per DPU-Hour
-- Typical run: 0.1 DPU-Hours = ~$0.044 per run
-- Daily runs: ~$1.32/month
-
-## Troubleshooting
-
-### Crawler Not Finding Data
-
-1. Verify logs are in correct path structure:
-   ```
-   s3://bucket/alb-logs/AWSLogs/123456789012/elasticloadbalancing/region/YYYY/MM/DD/
-   ```
-
-2. Check S3 bucket policy allows Glue access
-
-3. Verify IAM role permissions
-
-### Athena Query Errors
-
-1. **"Table not found"**: Run Glue crawler first
-2. **"Partition not found"**: Ensure crawler has completed successfully
-3. **"Access Denied"**: Check S3 bucket permissions and Athena results location
-
-### No Partitions Created
-
-1. Ensure S3 path follows ALB log structure
-2. Check Glue crawler configuration
-3. View crawler logs in CloudWatch
-
-## Clean Up
-
-To avoid ongoing charges, destroy all resources:
-
-```bash
-terraform destroy
-```
-
-Note: This will delete all S3 buckets and their contents (due to `force_destroy = true`).
-
-## Files Structure
-
-```
-.
-├── README.md                 # This file
-├── main.tf                   # Terraform provider configuration
-├── variables.tf              # Input variables
-├── outputs.tf                # Output values
-├── s3.tf                     # S3 bucket resources
-├── iam.tf                    # IAM roles and policies
-├── glue.tf                   # Glue database and crawler
-├── athena.tf                 # Athena workgroup and queries
-├── .gitignore               # Git ignore patterns
-└── examples/
-    ├── sample-logs/
-    │   └── sample-alb-log.log  # Sample ALB log file
-    └── upload-sample-logs.sh   # Script to upload sample logs
-```
-
-## Key Terraform Resources
-
-- `aws_s3_bucket.alb_logs` - S3 bucket for ALB access logs
-- `aws_s3_bucket.athena_results` - S3 bucket for Athena query results
-- `aws_glue_catalog_database.alb_logs` - Glue database
-- `aws_glue_crawler.alb_logs` - Glue crawler for automatic schema/partition detection
-- `aws_athena_workgroup.alb_logs` - Athena workgroup
-- `aws_athena_named_query.*` - Pre-configured sample queries
-
-## Additional Resources
-
-- [AWS Glue Crawler Documentation](https://docs.aws.amazon.com/glue/latest/dg/add-crawler.html)
-- [Amazon Athena Best Practices](https://docs.aws.amazon.com/athena/latest/ug/performance-tuning.html)
-- [ALB Access Logs Format](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html)
-- [Partition Projection in Athena](https://docs.aws.amazon.com/athena/latest/ug/partition-projection.html)
-
-## License
+## 📄 License
 
 This project is provided as-is for educational and demonstration purposes.
+
+---
+
+## 🙏 Acknowledgments
+
+- AWS Well-Architected Framework
+- GCP Architecture Framework
+- Azure Well-Architected Framework
+- Terraform Best Practices
+- DEA-C01 Data Engineering Certification
+
+---
+
+## 📞 Support
+
+- **Documentation**: See `docs/` directory
+- **Issues**: GitHub Issues
+- **Tutorial**: [100-Step Guide](docs/tutorials/100-STEP-GUIDE.md)
+
+---
+
+**Built with ❤️ for multi-cloud infrastructure automation**
+
+**Version**: 2.0  
+**Last Updated**: 2024-12-21
