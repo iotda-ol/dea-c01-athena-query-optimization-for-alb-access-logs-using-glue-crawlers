@@ -85,34 +85,12 @@ A comprehensive, production-ready, multi-cloud infrastructure solution for analy
 ├── map-diagram-infra/           # Infrastructure diagrams
 │
 ├── Makefile                      # Root Makefile (forwards to build/)
+├── NAVIGATION.md                 # Repository navigation guide
 ├── README.md                     # This file
 └── .gitignore                   # Git ignore rules
 ```
-│   └── guides/                   # Best practices and guides
-│       └── BEST-PRACTICES.md
-│
-├── map-diagram-infra/           # Auto-generated infrastructure diagrams
-│   ├── README.md
-│   ├── aws-infrastructure.png   # (Generated)
-│   ├── gcp-infrastructure.png   # (Generated)
-│   ├── azure-infrastructure.png # (Generated)
-│   └── multi-cloud-infrastructure.png  # (Generated)
-│
-├── tests/                        # Test suites
-│   ├── python/                   # Python unit tests
-│   └── terraform/                # Terraform validation tests
-│
-├── examples/                     # Usage examples
-│   ├── sample-logs/
-│   └── upload-sample-logs.sh
-│
-├── main.tf                       # Root Terraform configuration
-├── variables.tf                  # Root variables
-├── outputs.tf                    # Root outputs
-├── requirements.txt              # Python dependencies
-├── README.md                     # This file
-└── .gitignore                    # Git ignore patterns
-```
+
+> 📖 **For detailed navigation help, see [NAVIGATION.md](NAVIGATION.md)**
 
 ---
 
@@ -136,17 +114,28 @@ git clone <repository-url>
 cd dea-c01-athena-query-optimization-for-alb-access-logs-using-glue-crawlers
 
 # 2. Install Python dependencies
-pip install -r requirements.txt
+make install
 
 # 3. Choose your deployment path:
 ```
 
-### Option A: Deploy to AWS
+### Option A: Deploy to Development Environment
+
+```bash
+# Initialize and deploy to dev
+make init ENV=dev
+make plan ENV=dev
+make apply ENV=dev
+```
+
+### Option B: Deploy Specific Cloud Module
 
 ```bash
 # Initialize AWS module
-cd modules/aws
-terraform init
+make init CLOUD=aws
+make plan CLOUD=aws
+make apply CLOUD=aws
+```
 
 # Plan deployment
 terraform plan
