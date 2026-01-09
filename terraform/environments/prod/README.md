@@ -11,11 +11,35 @@ This directory contains the Terraform configuration for the **production** envir
 
 ## ⚠️ Important - Production Notes
 
-- State management should use remote backend (S3 + DynamoDB)
-- Uncomment backend configuration in `main.tf` before deploying
+- **State management**: Remote backend is commented out by default
+- **REQUIRED before production deployment**: Uncomment and configure the S3 backend
 - Ensure proper IAM permissions are in place
 - Review all changes carefully before applying
 - Use approval workflows for production changes
+- **Never commit sensitive values** to version control
+
+### Backend Configuration Steps
+
+1. Create S3 bucket for state storage:
+   ```bash
+   aws s3 mb s3://your-terraform-state-bucket --region us-east-1
+   ```
+
+2. Create DynamoDB table for state locking:
+   ```bash
+   aws dynamodb create-table \
+     --table-name terraform-state-lock \
+     --attribute-definitions AttributeName=LockID,AttributeType=S \
+     --key-schema AttributeName=LockID,KeyType=HASH \
+     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+   ```
+
+3. Uncomment the backend configuration in `main.tf`
+
+4. Initialize with remote backend:
+   ```bash
+   terraform init -migrate-state
+   ```
 
 ## Quick Start
 

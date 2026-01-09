@@ -1,3 +1,15 @@
+# Random password for Synapse SQL Administrator
+resource "random_password" "synapse_admin" {
+  length  = 32
+  special = true
+  
+  # Ensure password meets Azure complexity requirements
+  min_lower   = 1
+  min_upper   = 1
+  min_numeric = 1
+  min_special = 1
+}
+
 # Synapse Analytics Workspace for log analysis
 resource "azurerm_synapse_workspace" "lb_logs" {
   name                                 = "${var.project_name}-synapse-${var.environment}"
@@ -5,7 +17,7 @@ resource "azurerm_synapse_workspace" "lb_logs" {
   location                             = azurerm_resource_group.lb_logs.location
   storage_data_lake_gen2_filesystem_id = azurerm_storage_data_lake_gen2_filesystem.synapse.id
   sql_administrator_login              = "sqladmin"
-  sql_administrator_login_password     = "P@ssw0rd123!" # In production, use Azure Key Vault
+  sql_administrator_login_password     = var.synapse_sql_admin_password != null ? var.synapse_sql_admin_password : random_password.synapse_admin.result
 
   identity {
     type = "SystemAssigned"
