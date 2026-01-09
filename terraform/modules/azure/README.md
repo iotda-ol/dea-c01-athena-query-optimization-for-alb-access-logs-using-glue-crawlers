@@ -51,6 +51,39 @@ terraform apply -var-file="terraform.tfvars"
 | project_name | Project name | string | loganalysis | no |
 | resource_group_name | Resource group name | string | rg-log-analysis | no |
 | log_retention_days | Log retention in days | number | 90 | no |
+| synapse_sql_admin_password | SQL admin password for Synapse | string | null (auto-generated) | no |
+
+## Password Management
+
+The `synapse_sql_admin_password` variable controls the SQL administrator password for the Synapse workspace:
+
+- **Default Behavior**: When not provided (null), a random 32-character password is automatically generated meeting Azure's complexity requirements
+- **Custom Password**: You can provide your own password by setting the variable (must be marked as sensitive)
+- **Important**: The generated password is stored in Terraform state, which must be secured appropriately
+- **Best Practice**: For production, consider using Azure Key Vault to manage the password externally
+
+### Using Custom Password
+
+```hcl
+# Option 1: Via tfvars (not recommended for production)
+synapse_sql_admin_password = "your-secure-password"
+
+# Option 2: Via environment variable (recommended)
+export TF_VAR_synapse_sql_admin_password="your-secure-password"
+
+# Option 3: Via Azure Key Vault (most secure)
+# Retrieve from Key Vault in your deployment pipeline
+```
+
+### Retrieving Generated Password
+
+If using the auto-generated password, retrieve it from outputs:
+
+```bash
+terraform output -raw synapse_sql_admin_password
+```
+
+**Note**: This output is marked as sensitive and will not display in plan/apply output.
 
 ## Outputs
 
@@ -62,6 +95,7 @@ terraform apply -var-file="terraform.tfvars"
 | synapse_workspace_name | Synapse workspace name |
 | synapse_spark_pool_name | Spark pool name |
 | query_results_storage_account | Storage account for results |
+| synapse_sql_admin_password | SQL admin password (sensitive) |
 
 ## Architecture
 
@@ -139,10 +173,25 @@ az storage blob upload \
 
 ## Security
 
+### Encryption and Access Control
 - Storage accounts use LRS replication
-- Private access only
-- Lifecycle policies for retention
+- Private access only by default
+- Lifecycle policies for automatic data retention
 - Data Lake Gen2 for hierarchical namespace
+
+### Password Security
+- SQL administrator password auto-generated with 32-character complexity
+- Passwords marked as sensitive in Terraform
+- Stored securely in Terraform state (ensure state encryption)
+- Consider Azure Key Vault for production password management
+
+### Recommendations for Production
+- Enable Azure AD authentication for Synapse
+- Use Private Endpoints for storage accounts
+- Enable Advanced Threat Protection
+- Configure network security rules
+- Enable audit logging
+- Consider customer-managed keys (CMK) for encryption
 
 ## Related Documentation
 
