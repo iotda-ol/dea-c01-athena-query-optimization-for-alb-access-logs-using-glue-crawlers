@@ -29,11 +29,19 @@ A comprehensive, production-ready, multi-cloud infrastructure solution for analy
 
 ```
 .
-├── modules/                      # Terraform modules (organized by cloud)
-│   ├── aws/                      # AWS implementation (S3, Glue, Athena)
-│   ├── gcp/                      # GCP implementation (GCS, BigQuery)
-│   ├── azure/                    # Azure implementation (Blob, Synapse)
-│   └── common/                   # Shared/reusable components
+├── terraform/                     # All infrastructure-as-code
+│   ├── main.tf                   # Root orchestration module
+│   ├── variables.tf              # Root variables
+│   ├── outputs.tf                # Root outputs
+│   ├── environments/             # Environment-specific configurations
+│   │   ├── dev/                 # Development environment
+│   │   ├── staging/             # Staging environment
+│   │   └── prod/                # Production environment
+│   └── modules/                  # Reusable Terraform modules
+│       ├── aws/                 # AWS implementation (S3, Glue, Athena)
+│       ├── gcp/                 # GCP implementation (GCS, BigQuery)
+│       ├── azure/               # Azure implementation (Blob, Synapse)
+│       └── common/              # Shared/reusable components
 │
 ├── scripts/                      # Automation scripts
 │   ├── python/                   # Python utilities
@@ -44,10 +52,42 @@ A comprehensive, production-ready, multi-cloud infrastructure solution for analy
 │   └── bash/                     # Bash helper scripts
 │
 ├── docs/                         # Documentation
+│   ├── project/                  # Project-level documentation
+│   │   ├── ARCHITECTURE.md      # System architecture
+│   │   └── PROJECT-SUMMARY.md   # Project overview
+│   ├── development/              # Development documentation
+│   │   ├── CONTRIBUTING.md      # Contribution guidelines
+│   │   └── DEA-C01-BEST-PRACTICES.md  # Best practices
+│   ├── operations/               # Operational documentation
+│   │   ├── QUICKSTART.md        # Quick start guide
+│   │   └── CHANGELOG.md         # Version history
 │   ├── tutorials/                # Step-by-step guides
-│   │   └── 100-STEP-GUIDE.md    # Comprehensive tutorial (novice → expert)
-│   ├── architecture/             # Architecture documentation
+│   │   └── 100-STEP-GUIDE.md    # Comprehensive tutorial
+│   ├── architecture/             # Architecture diagrams
 │   │   └── MULTI-CLOUD-ARCHITECTURE.md
+│   └── guides/                   # Additional guides
+│       └── BEST-PRACTICES.md
+│
+├── tests/                        # Test suites
+│   └── python/                   # Python tests
+│       └── test_cost_estimator.py
+│
+├── examples/                     # Example configurations
+│   ├── sample-logs/             # Sample log files
+│   └── upload-sample-logs.sh    # Upload script
+│
+├── config/                       # Configuration files
+│   └── requirements.txt         # Python dependencies
+│
+├── build/                        # Build configuration
+│   └── Makefile                 # Build automation
+│
+├── map-diagram-infra/           # Infrastructure diagrams
+│
+├── Makefile                      # Root Makefile (forwards to build/)
+├── README.md                     # This file
+└── .gitignore                   # Git ignore rules
+```
 │   └── guides/                   # Best practices and guides
 │       └── BEST-PRACTICES.md
 │

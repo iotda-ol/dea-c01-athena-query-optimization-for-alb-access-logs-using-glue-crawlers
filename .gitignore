@@ -3,14 +3,17 @@
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
-*.tfvars
-*.tfvars.json
 crash.log
 crash.*.log
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Terraform variables (keep example files)
+*.tfvars
+*.tfvars.json
+!terraform/environments/**/terraform.tfvars
 
 # AWS
 .aws/
@@ -33,7 +36,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
 develop-eggs/
 dist/
 downloads/
