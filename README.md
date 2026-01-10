@@ -29,11 +29,19 @@ A comprehensive, production-ready, multi-cloud infrastructure solution for analy
 
 ```
 .
-├── modules/                      # Terraform modules (organized by cloud)
-│   ├── aws/                      # AWS implementation (S3, Glue, Athena)
-│   ├── gcp/                      # GCP implementation (GCS, BigQuery)
-│   ├── azure/                    # Azure implementation (Blob, Synapse)
-│   └── common/                   # Shared/reusable components
+├── terraform/                     # All infrastructure-as-code
+│   ├── main.tf                   # Root orchestration module
+│   ├── variables.tf              # Root variables
+│   ├── outputs.tf                # Root outputs
+│   ├── environments/             # Environment-specific configurations
+│   │   ├── dev/                 # Development environment
+│   │   ├── staging/             # Staging environment
+│   │   └── prod/                # Production environment
+│   └── modules/                  # Reusable Terraform modules
+│       ├── aws/                 # AWS implementation (S3, Glue, Athena)
+│       ├── gcp/                 # GCP implementation (GCS, BigQuery)
+│       ├── azure/               # Azure implementation (Blob, Synapse)
+│       └── common/              # Shared/reusable components
 │
 ├── scripts/                      # Automation scripts
 │   ├── python/                   # Python utilities
@@ -44,35 +52,45 @@ A comprehensive, production-ready, multi-cloud infrastructure solution for analy
 │   └── bash/                     # Bash helper scripts
 │
 ├── docs/                         # Documentation
+│   ├── project/                  # Project-level documentation
+│   │   ├── ARCHITECTURE.md      # System architecture
+│   │   └── PROJECT-SUMMARY.md   # Project overview
+│   ├── development/              # Development documentation
+│   │   ├── CONTRIBUTING.md      # Contribution guidelines
+│   │   └── DEA-C01-BEST-PRACTICES.md  # Best practices
+│   ├── operations/               # Operational documentation
+│   │   ├── QUICKSTART.md        # Quick start guide
+│   │   └── CHANGELOG.md         # Version history
 │   ├── tutorials/                # Step-by-step guides
-│   │   └── 100-STEP-GUIDE.md    # Comprehensive tutorial (novice → expert)
-│   ├── architecture/             # Architecture documentation
+│   │   └── 100-STEP-GUIDE.md    # Comprehensive tutorial
+│   ├── architecture/             # Architecture diagrams
 │   │   └── MULTI-CLOUD-ARCHITECTURE.md
-│   └── guides/                   # Best practices and guides
+│   └── guides/                   # Additional guides
 │       └── BEST-PRACTICES.md
 │
-├── map-diagram-infra/           # Auto-generated infrastructure diagrams
-│   ├── README.md
-│   ├── aws-infrastructure.png   # (Generated)
-│   ├── gcp-infrastructure.png   # (Generated)
-│   ├── azure-infrastructure.png # (Generated)
-│   └── multi-cloud-infrastructure.png  # (Generated)
-│
 ├── tests/                        # Test suites
-│   ├── python/                   # Python unit tests
-│   └── terraform/                # Terraform validation tests
+│   └── python/                   # Python tests
+│       └── test_cost_estimator.py
 │
-├── examples/                     # Usage examples
-│   ├── sample-logs/
-│   └── upload-sample-logs.sh
+├── examples/                     # Example configurations
+│   ├── sample-logs/             # Sample log files
+│   └── upload-sample-logs.sh    # Upload script
 │
-├── main.tf                       # Root Terraform configuration
-├── variables.tf                  # Root variables
-├── outputs.tf                    # Root outputs
-├── requirements.txt              # Python dependencies
+├── config/                       # Configuration files
+│   └── requirements.txt         # Python dependencies
+│
+├── build/                        # Build configuration
+│   └── Makefile                 # Build automation
+│
+├── map-diagram-infra/           # Infrastructure diagrams
+│
+├── Makefile                      # Root Makefile (forwards to build/)
+├── NAVIGATION.md                 # Repository navigation guide
 ├── README.md                     # This file
-└── .gitignore                    # Git ignore patterns
+└── .gitignore                   # Git ignore rules
 ```
+
+> 📖 **For detailed navigation help, see [NAVIGATION.md](NAVIGATION.md)**
 
 ---
 
@@ -96,17 +114,28 @@ git clone <repository-url>
 cd dea-c01-athena-query-optimization-for-alb-access-logs-using-glue-crawlers
 
 # 2. Install Python dependencies
-pip install -r requirements.txt
+make install
 
 # 3. Choose your deployment path:
 ```
 
-### Option A: Deploy to AWS
+### Option A: Deploy to Development Environment
+
+```bash
+# Initialize and deploy to dev
+make init ENV=dev
+make plan ENV=dev
+make apply ENV=dev
+```
+
+### Option B: Deploy Specific Cloud Module
 
 ```bash
 # Initialize AWS module
-cd modules/aws
-terraform init
+make init CLOUD=aws
+make plan CLOUD=aws
+make apply CLOUD=aws
+```
 
 # Plan deployment
 terraform plan

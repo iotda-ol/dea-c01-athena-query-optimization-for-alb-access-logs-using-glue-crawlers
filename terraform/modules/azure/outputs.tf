@@ -27,3 +27,9 @@ output "query_results_storage_account" {
   description = "Name of the storage account for query results"
   value       = azurerm_storage_account.query_results.name
 }
+
+output "synapse_sql_admin_password" {
+  description = "SQL administrator password for Synapse workspace (sensitive)"
+  value       = var.synapse_sql_admin_password != null ? var.synapse_sql_admin_password : random_password.synapse_admin.result
+  sensitive   = true
+}

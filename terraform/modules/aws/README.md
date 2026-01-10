@@ -80,10 +80,42 @@ Based on 100GB logs, 30 crawler runs, 300GB scanned:
 
 ## Security
 
+### Current Implementation
 - S3 buckets have public access blocked
-- Server-side encryption enabled (AES256)
+- Server-side encryption enabled (SSE-S3 with AES256)
 - IAM roles follow least privilege principle
 - Lifecycle policies for data retention
+- Versioning enabled on critical buckets
+
+### Production Recommendations
+Consider upgrading to AWS KMS for enhanced security:
+
+```hcl
+# Upgrade to KMS encryption for production
+server_side_encryption_configuration {
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.s3.arn
+    }
+  }
+}
+```
+
+**Benefits of KMS encryption:**
+- Enhanced key management and rotation
+- Detailed audit trails via CloudTrail
+- Fine-grained access control
+- Compliance with regulatory requirements
+- Integration with AWS Security Hub
+
+### Additional Security Best Practices
+- Enable S3 bucket logging
+- Configure AWS CloudTrail for API auditing
+- Use VPC endpoints for private S3 access
+- Implement bucket policies with explicit deny rules
+- Enable MFA delete for critical buckets
+- Regular security assessments with AWS Config
 
 ## Examples
 

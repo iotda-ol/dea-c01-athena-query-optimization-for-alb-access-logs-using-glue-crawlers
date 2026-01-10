@@ -32,3 +32,10 @@ variable "log_retention_days" {
   type        = number
   default     = 90
 }
+
+variable "synapse_sql_admin_password" {
+  description = "SQL administrator password for Synapse workspace. Should be stored in Azure Key Vault or as a secure environment variable."
+  type        = string
+  sensitive   = true
+  default     = null
+}
